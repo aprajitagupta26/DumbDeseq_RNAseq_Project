@@ -28,7 +28,8 @@ The project compares diseased cell lines with those treated by a compound and id
 3. Generated visualizations:  
    - Volcano plot  
    - Histogram of fold changes  
-   - Bar plot of top differentially expressed genes  
+   - Bar plot of top differentially expressed genes
+   - All plots have been re-generated using Base R plotting functions as per HackBio feedback.
 4. Annotated top genes with functional insights from **GeneCards**.  
 
 ---
