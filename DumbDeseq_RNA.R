@@ -4,20 +4,46 @@ View(DumbDeseq_data)
 summary(DumbDeseq_data)
 
 # Volcano plot
-library(ggplot2)
-DumbDeseq_data$threshold <- as.factor(ifelse(DumbDeseq_data$pvalue < 0.01 & abs(DumbDeseq_data$log2FoldChange) > 1,
-                                             ifelse(DumbDeseq_data$log2FoldChange > 1, "Upregulated", "Downregulated"), "Not Sig"))
+# Basic volcano plot
+with(df, plot(
+  log2FoldChange, -log10(pvalue),
+  pch = 20,
+  col = "black",
+  xlab = "Log2 Fold Change",
+  ylab = "-Log10 p-value",
+  main = "Volcano Plot (Base R)"
+))
 
-ggplot(DumbDeseq_data, aes(x=log2FoldChange, y=-log10(pvalue), color=threshold)) +
-  geom_point(alpha=0.8, size=1.5) +
-  scale_color_manual(values=c("blue", "grey", "red")) +
-  theme_minimal() +
-  labs(title="Volcano Plot", x="Log2 Fold Change", y="-Log10(p-value)")
+# Identify upregulated genes
+up <- df$log2FoldChange > 1 & df$pvalue < 0.01
+
+# Identify downregulated genes
+down <- df$log2FoldChange < -1 & df$pvalue < 0.01
+
+# Add upregulated points (red)
+points(
+  df$log2FoldChange[up],
+  -log10(df$pvalue[up]),
+  pch = 20,
+  col = "red"
+)
+
+# Add downregulated points (blue)
+points(
+  df$log2FoldChange[down],
+  -log10(df$pvalue[down]),
+  pch = 20,
+  col = "blue"
+)
 
 # histogram plot
-hist(DumbDeseq_data$log2FoldChange, breaks=50, col="skyblue",
-     main="Distribution of Log2 Fold Changes",
-     xlab="Log2 Fold Change")
+hist(
+  df$log2FoldChange,
+  breaks = 50,
+  col = "lightgray",
+  main = "Distribution of Log2 Fold Change",
+  xlab = "Log2 Fold Change"
+)
 
 # Upregulated genes
 up_genes <- subset(DumbDeseq_data, log2FoldChange > 1 & pvalue < 0.01)
@@ -33,15 +59,30 @@ top5_up
 top5_down
 
 # bar plot for top genes
-top_genes <- rbind(top5_up, top5_down)
-library(ggplot2)
-ggplot(top_genes, aes(x=reorder(rownames(top_genes), log2FoldChange),
-                      y=log2FoldChange, fill=log2FoldChange > 0)) +
-  geom_bar(stat="identity") +
-  coord_flip() +
-  labs(title="Top 5 Upregulated and Downregulated Genes",
-       x="Genes", y="Log2 Fold Change") +
-  scale_fill_manual(values=c("red","blue"))
+# Combine values
+bar_values <- c(top5_up$log2FoldChange, top5_down$log2FoldChange)
+
+# Combine names
+bar_names <- c(top5_up$Gene, top5_down$Gene)
+
+# Plot
+barplot(
+  bar_values,
+  names.arg = bar_names,
+  las = 2,
+  col = c(rep("red", 5), rep("blue", 5)),
+  main = "Top 5 Upregulated and Downregulated Genes",
+  ylab = "Log2 Fold Change"
+)
+
+#   STEP 7: SAVE RESULTS TO FILES
+
+write.csv(upregulated, "Upregulated_Genes.csv", row.names = FALSE)
+write.csv(downregulated, "Downregulated_Genes.csv", row.names = FALSE)
+write.csv(top5_up, "Top5_Upregulated.csv", row.names = FALSE)
+write.csv(top5_down, "Top5_Downregulated.csv", row.names = FALSE)
+
+############################################
 
 
 
